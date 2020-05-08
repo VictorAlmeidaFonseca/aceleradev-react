@@ -40,7 +40,10 @@ class App extends React.Component {
         <Container>
           <Contacts>
            {this.state.contacts.map((contact) => (
-             <Contact data={contact}/>
+             <Contact 
+              data={contact}
+              key={contact.id}
+              />
            ))}
             
           </Contacts>
