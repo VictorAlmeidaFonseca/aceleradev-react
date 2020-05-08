@@ -1,54 +1,150 @@
 import React from 'react';
-import Topbar from './components/Topbar';
-import Filters from './components/Filters';
-import Contact from './components/Contact';
+import TopBar from  './components/Topbar';
+import Contact from  './components/Contact';
 import Contacts from './components/Contacts';
-import Container from './components/Container'
+import Container  from './components/Container'
+import Filters from  './components/Filters';
 
 import './App.scss';
-
-const URL = 'https://5e82ac6c78337f00160ae496.mockapi.io/api/v1/contacts'
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      contacts: []
+
+    this.state =  {
+      contacts : [],
+      hasSearchFilter : false,
+      searchFilter: [],
+      sortyBy: '',
+      sortedContacts: [],
     }
-  }
-  
-  componentDidMount() {
-    fetch(URL)
-     .then(response => response.json())
-     .then((data) => {
-        this.setState(
-          {contacts: data}
-        )
-      }
-    )
+
+    this.searchFilter = this.searchFilter.bind(this)
+    this.toogleSortByValue = this.toogleSortByValue.bind(this)
   }
 
-  render() {
-    return (
+  searchFilter(name) {
+    const { contacts } = this.state;
+
+    if (name.length > 0) {
+      const filteredContacts = contacts.filter(contact => {
+        return contact.name
+              
+      });
+      
+      this.setState({
+        ...this.state,
+        hasSearchFilter: true,
+        searchFilter: filteredContacts,
+      });
+
+    } else {
+      this.setState({
+        ...this.state,
+        hasSearchFilter: false,
+        searchFilter: [],
+      });
+    }
+   }
+
+ 
+   toogleSortByValue(value) {
+
+  const compareValues = (key, order = 'asc') => {
+    return function innerSort(a, b) {
+      if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+        return 0;
+      }
+
+      const varA = (typeof a[key] === 'string')
+        ? a[key].toUpperCase() : a[key];
+      const varB = (typeof b[key] === 'string')
+        ? b[key].toUpperCase() : b[key];
+
+      let comparison = 0;
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+      return (
+        (order === 'desc') ? (comparison * -1) : comparison
+      );
+    };
+  };
+
+  const { contacts, sortBy } = this.state;
+
+  let sortValue;
+  let sortedContacts;
+
+  if (value === sortBy) {
+    sortValue = '';
+    sortedContacts = [...contacts];
+  }
+  else {
+    sortValue = value;
+    sortedContacts = contacts.sort(compareValues(value));
+    console.log(sortedContacts);
+  }
+
+  this.setState({
+    ...this.state,
+    hasSearchFilter: false,
+    searchFilter: [],
+    sortBy: sortValue,
+    sortedContacts,
+  })
+}
+
+componentDidMount() {
+  fetch('https://5e82ac6c78337f00160ae496.mockapi.io/api/v1/contacts')
+    .then(response => response.json())
+    .then(data => this.setState({ contacts: data }));
+}
+
+render() {
+  const {
+    contacts,
+    hasSearchFilter,
+    searchFilter,
+    sortBy,
+    sortedContacts,
+  } = this.state;
+
+  let outputContacts;
+
+  if (!hasSearchFilter) {
+    if (contacts.length > 0 && sortedContacts.length > 0) {
+      outputContacts = sortedContacts.map((contact) => (<Contact key={contact.id} data={contact} />));
+    }
+    else if (contacts.length > 0 && sortedContacts.length === 0) {
+      outputContacts = contacts.map((contact) => (<Contact key={contact.id} data={contact} />));
+    }
+    else {
+      outputContacts = (<h2>Loading...</h2>);
+    }
+  }
+  else {
+    outputContacts = searchFilter.map((contact) => (<Contact key={contact.id} data={contact} />));
+  } 
+  
+  return (
       <React.Fragment>
-      <Topbar />
-        
+       <TopBar />
         <Container>
-          <Filters /> 
+          <Filters 
+            onSearch={this.searchFilter}
+            toggleSort={this.toogleSortByValue}
+            selectedFilter={sortBy}
+
+          />
         </Container>
-        
         <Container>
           <Contacts>
-           {this.state.contacts.map((contact) => (
-             <Contact 
-              data={contact}
-              key={contact.id}
-              />
-           ))}
-            
+          {outputContacts}
           </Contacts>
         </Container>
-      
       </React.Fragment>
     )
   }
