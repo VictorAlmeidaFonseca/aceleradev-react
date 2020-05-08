@@ -4,14 +4,28 @@ import './styles.scss'
 class Contact extends React.Component {
   render() {
     return (
-        <article className="contact">
-              <span className="contact__avatar" />
-              <span className="contact__data">Nome</span>
-              <span className="contact__data">Telefone</span>
-              <span className="contact__data">País</span>
-              <span className="contact__data">Admissão</span>
-              <span className="contact__data">Empresa</span>
-              <span className="contact__data">Departamento</span>
+        <article className="contact" key={this.props.data.id}>
+              <span className="contact__avatar"> 
+              <img src={this.props.data.avatar} alt={this.props.data.name} />
+              </span>
+              <span className="contact__data">
+               {this.props.data.name}
+              </span>
+              <span className="contact__data">
+                {this.props.data.phone}
+              </span>
+              <span className="contact__data">
+                {this.props.data.country}
+              </span>
+              <span className="contact__data">
+                {this.props.data.dataAdmissao}
+              </span>
+              <span className="contact__data">
+                {this.props.data.company}
+              </span>
+              <span className="contact__data">
+                {this.props.data.department}
+              </span>
         </article>
     );
   }
